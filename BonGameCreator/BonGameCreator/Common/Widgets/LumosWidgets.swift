@@ -172,10 +172,12 @@ final class CrystalStepperRow: UIView {
         valueLbl.setContentHuggingPriority(.required, for: .horizontal)
 
         for btn in [minusBtn, plusBtn] {
-            btn.tintColor = LumosTheme.Pigment.auroraViolet
+            btn.tintColor = LumosTheme.Pigment.auroraCyan
             btn.titleLabel?.font = LumosTheme.Typeface.headline(20)
-            btn.backgroundColor = LumosTheme.Pigment.cardSurface
+            btn.backgroundColor = LumosTheme.Pigment.obsidianBase
             btn.layer.cornerRadius = 8
+            btn.layer.borderWidth = 1
+            btn.layer.borderColor = LumosTheme.Pigment.borderGlow.cgColor
         }
         minusBtn.setTitle("−", for: .normal)
         plusBtn.setTitle("+", for: .normal)

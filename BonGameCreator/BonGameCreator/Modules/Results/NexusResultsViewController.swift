@@ -24,6 +24,8 @@ final class NexusResultsViewController: UIViewController {
         buildHistogramChart()
         buildTopRewards()
         buildFunScore()
+        buildRTPCurve()
+        buildOutcomeDistPie()
     }
 
     private func setupLayout() {
@@ -186,6 +188,57 @@ final class NexusResultsViewController: UIViewController {
             scoreView.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
             scoreView.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
             scoreView.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12)
+        ])
+        contentStack.addArrangedSubview(card)
+    }
+
+    private func buildRTPCurve() {
+        guard outcome.rawSamples.count > 1 else { return }
+        let header = LumosSectionHeader(title: "RTP Convergence Curve", accentColor: LumosTheme.Pigment.auroraGreen)
+        contentStack.addArrangedSubview(header)
+
+        let card = LumosCardView()
+        card.heightAnchor.constraint(equalToConstant: 140).isActive = true
+
+        let chart = NexusLineChartView(samples: outcome.rawSamples, accentColor: LumosTheme.Pigment.auroraGreen)
+        chart.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(chart)
+        NSLayoutConstraint.activate([
+            chart.topAnchor.constraint(equalTo: card.topAnchor, constant: 8),
+            chart.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 8),
+            chart.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -8),
+            chart.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -8)
+        ])
+        contentStack.addArrangedSubview(card)
+
+        let noteLbl = UILabel()
+        noteLbl.text = "Running average of \(outcome.rawSamples.count) sampled rounds"
+        noteLbl.font = LumosTheme.Typeface.body(11)
+        noteLbl.textColor = LumosTheme.Pigment.textMuted
+        noteLbl.textAlignment = .right
+        contentStack.addArrangedSubview(noteLbl)
+    }
+
+    private func buildOutcomeDistPie() {
+        guard !outcome.bucketedHistogram.isEmpty else { return }
+        let header = LumosSectionHeader(title: "Outcome Distribution", accentColor: LumosTheme.Pigment.auroraOrange)
+        contentStack.addArrangedSubview(header)
+
+        let card = LumosCardView()
+        card.heightAnchor.constraint(equalToConstant: 160).isActive = true
+
+        let colors = LumosTheme.Gradient.wheelSeg
+        let slices = outcome.bucketedHistogram.enumerated().map { i, b in
+            NexusPieChartView.Slice(label: b.rangeLabel, value: b.proportion, color: colors[i % colors.count])
+        }
+        let pie = NexusPieChartView(slices: slices)
+        pie.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(pie)
+        NSLayoutConstraint.activate([
+            pie.topAnchor.constraint(equalTo: card.topAnchor, constant: 8),
+            pie.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 8),
+            pie.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -8),
+            pie.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -8)
         ])
         contentStack.addArrangedSubview(card)
     }

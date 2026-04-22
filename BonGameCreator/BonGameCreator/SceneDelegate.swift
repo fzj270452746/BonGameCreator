@@ -10,10 +10,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = GalaxTabBarController()
+        let root = GalaxTabBarController()
+        window.rootViewController = root
         window.backgroundColor = LumosTheme.Pigment.obsidianBase
         self.window = window
         window.makeKeyAndVisible()
+
+        if LumosOnboardingViewController.shouldShow() {
+            let onboarding = LumosOnboardingViewController()
+            onboarding.modalPresentationStyle = .fullScreen
+            root.present(onboarding, animated: false)
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

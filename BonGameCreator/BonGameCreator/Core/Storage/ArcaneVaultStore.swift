@@ -94,6 +94,33 @@ final class ArcaneVaultStore {
         f2.spinsConfig = CrystalFreeSpinsConfig(spinCount: 8, baseMultiplier: 5.0, retriggerChance: 0.08, minSpinReward: 1, maxSpinReward: 20)
         presets.append(f2)
 
+        // Cascade
+        var c1 = NexusBlueprint()
+        c1.stellarName = "Cascade: Standard"
+        c1.bonusKind = .cascade
+        c1.cascadeConfig = CrystalCascadeConfig(rows: 5, cols: 5, symbolCount: 8, minMatch: 3, baseMultiplier: 1.0, cascadeMultiplierStep: 0.5, maxCascades: 10)
+        presets.append(c1)
+
+        var c2 = NexusBlueprint()
+        c2.stellarName = "Cascade: High Volatility"
+        c2.bonusKind = .cascade
+        c2.cascadeConfig = CrystalCascadeConfig(rows: 6, cols: 6, symbolCount: 10, minMatch: 4, baseMultiplier: 2.0, cascadeMultiplierStep: 1.0, maxCascades: 15)
+        presets.append(c2)
+
+        // Expanding Wilds
+        var e1 = NexusBlueprint()
+        e1.stellarName = "Expanding Wilds: Classic"
+        e1.bonusKind = .expandingWilds
+        e1.expandingWildsConfig = CrystalExpandingWildsConfig(wildChance: 0.10, expandChance: 0.40, reelCount: 5, baseSpinReward: 2.0, wildMultiplier: 3.0)
+        presets.append(e1)
+
+        // Bonus Buy
+        var b1 = NexusBlueprint()
+        b1.stellarName = "Bonus Buy: Standard"
+        b1.bonusKind = .bonusBuy
+        b1.bonusBuyConfig = CrystalBonusBuyConfig(buyCostMultiplier: 80.0, bonusTriggerRTP: 120.0, baseGameRTP: 96.0, variance: 0.3)
+        presets.append(b1)
+
         return presets
     }
 }

@@ -4,36 +4,39 @@ enum LumosTheme {
 
     // MARK: - Palette
     enum Pigment {
-        static let obsidianBase    = UIColor(hex: "#0D0D1A")
-        static let midnightSurface = UIColor(hex: "#14142B")
-        static let cardSurface     = UIColor(hex: "#1E1E3A")
-        static let elevatedCard    = UIColor(hex: "#252545")
-        static let borderGlow      = UIColor(hex: "#3A3A6A")
+        // Backgrounds — clean white to light gray
+        static let obsidianBase    = UIColor(hex: "#F5F7FA")   // page background
+        static let midnightSurface = UIColor(hex: "#FFFFFF")   // nav / tab bar
+        static let cardSurface     = UIColor(hex: "#FFFFFF")   // card fill
+        static let elevatedCard    = UIColor(hex: "#EEF1F6")   // stepper / badge bg
+        static let borderGlow      = UIColor(hex: "#D8DDE8")   // subtle border
 
-        static let auroraCyan      = UIColor(hex: "#00F5FF")
-        static let auroraViolet    = UIColor(hex: "#9B5DE5")
-        static let auroraMagenta   = UIColor(hex: "#F72585")
-        static let auroraAmber     = UIColor(hex: "#FFB703")
-        static let auroraGreen     = UIColor(hex: "#06D6A0")
-        static let auroraOrange    = UIColor(hex: "#FF6B35")
+        // Accent palette — deep indigo + coral/amber
+        static let auroraCyan      = UIColor(hex: "#3B6FE8")   // primary indigo blue
+        static let auroraViolet    = UIColor(hex: "#7C5CDB")   // soft purple
+        static let auroraMagenta   = UIColor(hex: "#F05F7A")   // coral pink
+        static let auroraAmber     = UIColor(hex: "#F59E0B")   // warm amber
+        static let auroraGreen     = UIColor(hex: "#10B981")   // teal green
+        static let auroraOrange    = UIColor(hex: "#F97316")   // orange
 
-        static let textPrimary     = UIColor(hex: "#F0F0FF")
-        static let textSecondary   = UIColor(hex: "#9090BB")
-        static let textMuted       = UIColor(hex: "#5A5A8A")
+        // Text — dark on light
+        static let textPrimary     = UIColor(hex: "#111827")   // near-black
+        static let textSecondary   = UIColor(hex: "#6B7280")   // medium gray
+        static let textMuted       = UIColor(hex: "#9CA3AF")   // muted gray
     }
 
     // MARK: - Gradients
     enum Gradient {
-        static let heroTop    = [UIColor(hex: "#9B5DE5"), UIColor(hex: "#F72585")]
-        static let cyanPurple = [UIColor(hex: "#00F5FF"), UIColor(hex: "#9B5DE5")]
-        static let amberOrange = [UIColor(hex: "#FFB703"), UIColor(hex: "#FF6B35")]
-        static let greenCyan  = [UIColor(hex: "#06D6A0"), UIColor(hex: "#00F5FF")]
-        static let pickCard   = [UIColor(hex: "#1E1E3A"), UIColor(hex: "#252560")]
+        static let heroTop     = [UIColor(hex: "#3B6FE8"), UIColor(hex: "#7C5CDB")]
+        static let cyanPurple  = [UIColor(hex: "#3B6FE8"), UIColor(hex: "#60A5FA")]
+        static let amberOrange = [UIColor(hex: "#F59E0B"), UIColor(hex: "#F97316")]
+        static let greenCyan   = [UIColor(hex: "#10B981"), UIColor(hex: "#3B6FE8")]
+        static let pickCard    = [UIColor(hex: "#EEF2FF"), UIColor(hex: "#E0E7FF")]
         static let wheelSeg: [UIColor] = [
-            UIColor(hex: "#FF6B35"), UIColor(hex: "#F72585"),
-            UIColor(hex: "#9B5DE5"), UIColor(hex: "#00F5FF"),
-            UIColor(hex: "#06D6A0"), UIColor(hex: "#FFB703"),
-            UIColor(hex: "#E84855"), UIColor(hex: "#4CC9F0")
+            UIColor(hex: "#3B6FE8"), UIColor(hex: "#F05F7A"),
+            UIColor(hex: "#7C5CDB"), UIColor(hex: "#10B981"),
+            UIColor(hex: "#F59E0B"), UIColor(hex: "#F97316"),
+            UIColor(hex: "#60A5FA"), UIColor(hex: "#34D399")
         ]
     }
 
@@ -65,10 +68,10 @@ enum LumosTheme {
 
     // MARK: - Corner Radius
     enum Radius {
-        static let sm: CGFloat  = 8
-        static let md: CGFloat  = 12
-        static let lg: CGFloat  = 16
-        static let xl: CGFloat  = 20
+        static let sm: CGFloat   = 8
+        static let md: CGFloat   = 12
+        static let lg: CGFloat   = 16
+        static let xl: CGFloat   = 20
         static let pill: CGFloat = 20
     }
 }
@@ -99,13 +102,13 @@ extension CAGradientLayer {
     }
 }
 
-// MARK: - UIView Glow
+// MARK: - UIView helpers
 extension UIView {
-    func applyLumosGlow(color: UIColor = LumosTheme.Pigment.auroraCyan, radius: CGFloat = 8, opacity: Float = 0.6) {
+    func applyLumosGlow(color: UIColor = LumosTheme.Pigment.auroraCyan, radius: CGFloat = 8, opacity: Float = 0.18) {
         layer.shadowColor = color.cgColor
         layer.shadowRadius = radius
         layer.shadowOpacity = opacity
-        layer.shadowOffset = .zero
+        layer.shadowOffset = CGSize(width: 0, height: 2)
     }
 
     func applyGradientBackground(colors: [UIColor], cornerRadius: CGFloat = 0) {

@@ -2,23 +2,32 @@ import Foundation
 
 // MARK: - Bonus Type
 enum ZephyrBonusKind: Int, CaseIterable, Codable {
-    case pickGame = 0
-    case wheelGame = 1
-    case freeSpins = 2
+    case pickGame       = 0
+    case wheelGame      = 1
+    case freeSpins      = 2
+    case cascade        = 3
+    case expandingWilds = 4
+    case bonusBuy       = 5
 
     var stellarTitle: String {
         switch self {
-        case .pickGame:   return "Pick Game"
-        case .wheelGame:  return "Wheel"
-        case .freeSpins:  return "Free Spins"
+        case .pickGame:       return "Pick Game"
+        case .wheelGame:      return "Wheel"
+        case .freeSpins:      return "Free Spins"
+        case .cascade:        return "Cascade"
+        case .expandingWilds: return "Expanding Wilds"
+        case .bonusBuy:       return "Bonus Buy"
         }
     }
 
     var stellarIcon: String {
         switch self {
-        case .pickGame:   return "rectangle.grid.3x2.fill"
-        case .wheelGame:  return "circle.grid.cross.fill"
-        case .freeSpins:  return "sparkles"
+        case .pickGame:       return "rectangle.grid.3x2.fill"
+        case .wheelGame:      return "circle.grid.cross.fill"
+        case .freeSpins:      return "sparkles"
+        case .cascade:        return "arrow.down.to.line.alt"
+        case .expandingWilds: return "square.stack.fill"
+        case .bonusBuy:       return "cart.fill"
         }
     }
 }
@@ -77,7 +86,38 @@ struct NexusBlueprint: Codable, Identifiable {
     var pickConfig: CrystalPickConfig = CrystalPickConfig()
     var wheelConfig: CrystalWheelConfig = CrystalWheelConfig()
     var spinsConfig: CrystalFreeSpinsConfig = CrystalFreeSpinsConfig()
+    var cascadeConfig: CrystalCascadeConfig = CrystalCascadeConfig()
+    var expandingWildsConfig: CrystalExpandingWildsConfig = CrystalExpandingWildsConfig()
+    var bonusBuyConfig: CrystalBonusBuyConfig = CrystalBonusBuyConfig()
     var createdAt: Date = Date()
+}
+
+// MARK: - Cascade
+struct CrystalCascadeConfig: Codable {
+    var rows: Int = 5
+    var cols: Int = 5
+    var symbolCount: Int = 8
+    var minMatch: Int = 3
+    var baseMultiplier: Double = 1.0
+    var cascadeMultiplierStep: Double = 0.5
+    var maxCascades: Int = 10
+}
+
+// MARK: - Expanding Wilds
+struct CrystalExpandingWildsConfig: Codable {
+    var wildChance: Double = 0.10
+    var expandChance: Double = 0.40
+    var reelCount: Int = 5
+    var baseSpinReward: Double = 2.0
+    var wildMultiplier: Double = 3.0
+}
+
+// MARK: - Bonus Buy
+struct CrystalBonusBuyConfig: Codable {
+    var buyCostMultiplier: Double = 80.0
+    var bonusTriggerRTP: Double = 120.0
+    var baseGameRTP: Double = 96.0
+    var variance: Double = 0.3
 }
 
 // MARK: - Simulation Count

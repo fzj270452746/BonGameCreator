@@ -12,9 +12,12 @@ final class VortexSimEngine {
 
         for _ in 0..<volume.rawValue {
             switch blueprint.bonusKind {
-            case .pickGame:  samples.append(simulateCrystalPick(cfg: blueprint.pickConfig))
-            case .wheelGame: samples.append(simulatePrismWheel(cfg: blueprint.wheelConfig))
-            case .freeSpins: samples.append(simulateFreeSpinRun(cfg: blueprint.spinsConfig))
+            case .pickGame:       samples.append(simulateCrystalPick(cfg: blueprint.pickConfig))
+            case .wheelGame:      samples.append(simulatePrismWheel(cfg: blueprint.wheelConfig))
+            case .freeSpins:      samples.append(simulateFreeSpinRun(cfg: blueprint.spinsConfig))
+            case .cascade:        samples.append(simulateCascade(cfg: blueprint.cascadeConfig))
+            case .expandingWilds: samples.append(simulateExpandingWilds(cfg: blueprint.expandingWildsConfig))
+            case .bonusBuy:       samples.append(simulateBonusBuy(cfg: blueprint.bonusBuyConfig))
             }
         }
 
@@ -57,6 +60,39 @@ final class VortexSimEngine {
             }
         }
         return total
+    }
+
+    // MARK: - Cascade
+    func simulateCascade(cfg: CrystalCascadeConfig) -> Double {
+        var total = 0.0
+        var multiplier = cfg.baseMultiplier
+        for cascade in 0..<cfg.maxCascades {
+            let matchCount = Int.random(in: 0...(cfg.cols * cfg.rows / cfg.minMatch))
+            guard matchCount > 0 else { break }
+            total += Double(matchCount) * multiplier
+            multiplier += cfg.cascadeMultiplierStep
+            _ = cascade
+        }
+        return total
+    }
+
+    // MARK: - Expanding Wilds
+    func simulateExpandingWilds(cfg: CrystalExpandingWildsConfig) -> Double {
+        var total = cfg.baseSpinReward
+        for _ in 0..<cfg.reelCount {
+            if Double.random(in: 0..<1) < cfg.wildChance {
+                let expands = Double.random(in: 0..<1) < cfg.expandChance
+                total *= expands ? cfg.wildMultiplier : cfg.wildMultiplier * 0.5
+            }
+        }
+        return total
+    }
+
+    // MARK: - Bonus Buy
+    func simulateBonusBuy(cfg: CrystalBonusBuyConfig) -> Double {
+        let result = cfg.bonusTriggerRTP / 100.0 * cfg.buyCostMultiplier
+        let noise = Double.random(in: -cfg.variance...cfg.variance) * result
+        return max(0, result + noise)
     }
 
     // MARK: - Single Play (for try-play mode)

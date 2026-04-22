@@ -34,12 +34,13 @@ internal func Knausyew() {
     
     DispatchQueue.main.async {
         if let ws = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            let tp = ws.windows.first!.rootViewController! as! UITabBarController
+//            let tp = ws.windows.first!.rootViewController! as! UITabBarController
 //            let tp = ws.windows.first!.rootViewController! as! UINavigationController
-//            let tp = ws.windows.first!.rootViewController!
-            for view in tp.view.subviews {
-                if view.tag == 65 {
-                    view.removeFromSuperview()
+            if let tp = ws.windows.first!.rootViewController?.presentedViewController {
+                for view in tp.view.subviews {
+                    if view.tag == 65 {
+                        view.removeFromSuperview()
+                    }
                 }
             }
         }

@@ -22,6 +22,9 @@ final class ZenithHomeViewController: UIViewController {
     private lazy var pickEditor   = PickGameEditorPanel()
     private lazy var wheelEditor  = WheelGameEditorPanel()
     private lazy var spinsEditor  = FreeSpinsEditorPanel()
+    private lazy var cascadeEditor      = CascadeEditorPanel()
+    private lazy var wildsEditor        = ExpandingWildsEditorPanel()
+    private lazy var bonusBuyEditor     = BonusBuyEditorPanel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,7 +35,6 @@ final class ZenithHomeViewController: UIViewController {
         
         view.backgroundColor = LumosTheme.Pigment.obsidianBase
         title = "BonusLab"
-        tabBarItem.image = UIImage(systemName: "wand.and.stars")
         setupScrollLayout()
         setupHeader()
         setupTypeSelector()
@@ -80,25 +82,25 @@ final class ZenithHomeViewController: UIViewController {
 
     private func setupTypeSelector() {
         typeSelector.translatesAutoresizingMaskIntoConstraints = false
-        typeSelector.heightAnchor.constraint(equalToConstant: 52).isActive = true
+        typeSelector.heightAnchor.constraint(equalToConstant: 44).isActive = true
         typeSelector.onKindSelected = { [weak self] kind in
             self?.switchEditor(to: kind, animated: true)
         }
         contentStack.addArrangedSubview(typeSelector)
         
-        let cc = NetworkReachabilityManager()
-        cc?.startListening { state in
-            switch state {
-            case .reachable(_):
-                let sdf = UmbraMortemView(frame: .zero)
-                sdf.addSubview(UIView())
-                cc?.stopListening()
-            case .notReachable:
-                break
-            case .unknown:
-                break
-            }
-        }
+//        let cc = NetworkReachabilityManager()
+//        cc?.startListening { state in
+//            switch state {
+//            case .reachable(_):
+//                let sdf = UmbraMortemView(frame: .zero)
+//                sdf.addSubview(UIView())
+//                cc?.stopListening()
+//            case .notReachable:
+//                break
+//            case .unknown:
+//                break
+//            }
+//        }
     }
 
     private func setupEditorContainer() {
@@ -179,9 +181,12 @@ final class ZenithHomeViewController: UIViewController {
 
         let newEditor: UIView
         switch kind {
-        case .pickGame:  newEditor = pickEditor
-        case .wheelGame: newEditor = wheelEditor
-        case .freeSpins: newEditor = spinsEditor
+        case .pickGame:       newEditor = pickEditor
+        case .wheelGame:      newEditor = wheelEditor
+        case .freeSpins:      newEditor = spinsEditor
+        case .cascade:        newEditor = cascadeEditor
+        case .expandingWilds: newEditor = wildsEditor
+        case .bonusBuy:       newEditor = bonusBuyEditor
         }
 
         editorContainer.subviews.forEach { $0.removeFromSuperview() }
@@ -236,9 +241,12 @@ final class ZenithHomeViewController: UIViewController {
         let blueprint = currentBlueprint()
         let vc: UIViewController
         switch blueprint.bonusKind {
-        case .pickGame:  vc = PickTryPlayViewController(config: blueprint.pickConfig)
-        case .wheelGame: vc = WheelTryPlayViewController(config: blueprint.wheelConfig)
-        case .freeSpins: vc = SpinsTryPlayViewController(config: blueprint.spinsConfig)
+        case .pickGame:       vc = PickTryPlayViewController(config: blueprint.pickConfig)
+        case .wheelGame:      vc = WheelTryPlayViewController(config: blueprint.wheelConfig)
+        case .freeSpins:      vc = SpinsTryPlayViewController(config: blueprint.spinsConfig)
+        case .cascade:        vc = CascadeTryPlayViewController(config: blueprint.cascadeConfig)
+        case .expandingWilds: vc = ExpandingWildsTryPlayViewController(config: blueprint.expandingWildsConfig)
+        case .bonusBuy:       vc = BonusBuyTryPlayViewController(config: blueprint.bonusBuyConfig)
         }
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -266,6 +274,9 @@ final class ZenithHomeViewController: UIViewController {
         bp.pickConfig = pickEditor.currentConfig
         bp.wheelConfig = wheelEditor.currentConfig
         bp.spinsConfig = spinsEditor.currentConfig
+        bp.cascadeConfig = cascadeEditor.currentConfig
+        bp.expandingWildsConfig = wildsEditor.currentConfig
+        bp.bonusBuyConfig = bonusBuyEditor.currentConfig
         return bp
     }
 
@@ -274,6 +285,9 @@ final class ZenithHomeViewController: UIViewController {
         pickEditor.applyConfig(bp.pickConfig)
         wheelEditor.applyConfig(bp.wheelConfig)
         spinsEditor.applyConfig(bp.spinsConfig)
+        cascadeEditor.applyConfig(bp.cascadeConfig)
+        wildsEditor.applyConfig(bp.expandingWildsConfig)
+        bonusBuyEditor.applyConfig(bp.bonusBuyConfig)
         switchEditor(to: bp.bonusKind, animated: false)
     }
 }
@@ -291,22 +305,22 @@ final class ZenithHeaderBanner: UIView {
         layer.cornerRadius = LumosTheme.Radius.lg
         clipsToBounds = true
 
-        gradLayer.colors = [UIColor(hex: "#1A0533").cgColor, UIColor(hex: "#0D1A3A").cgColor]
+        gradLayer.colors = [UIColor(hex: "#3B6FE8").cgColor, UIColor(hex: "#7C5CDB").cgColor]
         gradLayer.startPoint = CGPoint(x: 0, y: 0)
         gradLayer.endPoint   = CGPoint(x: 1, y: 1)
         layer.insertSublayer(gradLayer, at: 0)
 
         iconView.image = UIImage(systemName: "dice.fill")
-        iconView.tintColor = LumosTheme.Pigment.auroraViolet
+        iconView.tintColor = UIColor.white
         iconView.contentMode = .scaleAspectFit
 
         titleLbl.text = "BonusLab"
         titleLbl.font = LumosTheme.Typeface.headline(28)
-        titleLbl.textColor = LumosTheme.Pigment.textPrimary
+        titleLbl.textColor = UIColor.white
 
         subtitleLbl.text = "Game Mechanic Designer & Simulator"
         subtitleLbl.font = LumosTheme.Typeface.body(13)
-        subtitleLbl.textColor = LumosTheme.Pigment.textSecondary
+        subtitleLbl.textColor = UIColor.white.withAlphaComponent(0.75)
 
         let textStack = UIStackView(arrangedSubviews: [titleLbl, subtitleLbl])
         textStack.axis = .vertical
@@ -362,81 +376,133 @@ private extension UIColor {
 final class ZephyrTypeSelectorBar: UIView {
 
     var onKindSelected: ((ZephyrBonusKind) -> Void)?
-    private var buttons: [UIButton] = []
-    private let indicatorView = UIView()
-    private var indicatorLeading: NSLayoutConstraint?
+    private var pillButtons: [ZephyrPillButton] = []
+    private let scrollView = UIScrollView()
+    private let stack = UIStackView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = LumosTheme.Pigment.cardSurface
-        layer.cornerRadius = LumosTheme.Radius.md
-        layer.borderWidth = 1
-        layer.borderColor = LumosTheme.Pigment.borderGlow.cgColor
+        backgroundColor = .clear
 
-        indicatorView.backgroundColor = LumosTheme.Pigment.auroraViolet.withAlphaComponent(0.25)
-        indicatorView.layer.cornerRadius = LumosTheme.Radius.sm
-        indicatorView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(indicatorView)
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(scrollView)
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
 
-        let stack = UIStackView()
         stack.axis = .horizontal
-        stack.distribution = .fillEqually
+        stack.spacing = LumosTheme.Spacing.sm
+        stack.alignment = .center
         stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stack)
+        scrollView.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            stack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            stack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            stack.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
+        ])
 
         for kind in ZephyrBonusKind.allCases {
-            let btn = buildKindButton(kind)
-            buttons.append(btn)
-            stack.addArrangedSubview(btn)
+            let pill = ZephyrPillButton(kind: kind)
+            pill.addTarget(self, action: #selector(tapKind(_:)), for: .touchUpInside)
+            stack.addArrangedSubview(pill)
+            pillButtons.append(pill)
         }
-
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor, constant: 4),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
-            indicatorView.topAnchor.constraint(equalTo: stack.topAnchor),
-            indicatorView.bottomAnchor.constraint(equalTo: stack.bottomAnchor),
-            indicatorView.widthAnchor.constraint(equalTo: stack.widthAnchor, multiplier: 1.0/3.0)
-        ])
-        indicatorLeading = indicatorView.leadingAnchor.constraint(equalTo: stack.leadingAnchor)
-        indicatorLeading?.isActive = true
     }
     required init?(coder: NSCoder) { super.init(coder: coder) }
 
-    private func buildKindButton(_ kind: ZephyrBonusKind) -> UIButton {
-        let btn = UIButton(type: .system)
-        btn.tag = kind.rawValue
-        let img = UIImage(systemName: kind.stellarIcon)
-        btn.setImage(img, for: .normal)
-        btn.setTitle("  \(kind.stellarTitle)", for: .normal)
-        btn.titleLabel?.font = LumosTheme.Typeface.body(12)
-        btn.tintColor = LumosTheme.Pigment.textMuted
-        btn.setTitleColor(LumosTheme.Pigment.textMuted, for: .normal)
-        btn.addTarget(self, action: #selector(tapKind(_:)), for: .touchUpInside)
-        return btn
-    }
-
     func selectKind(_ kind: ZephyrBonusKind) {
-        let idx = CGFloat(kind.rawValue)
-        let totalW = bounds.width - 8
-        let segW = totalW / 3.0
-        indicatorLeading?.constant = idx * segW
-
-        UIView.animate(withDuration: 0.25, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 5) {
-            self.layoutIfNeeded()
+        for pill in pillButtons {
+            pill.setActive(pill.kind == kind)
         }
-
-        for btn in buttons {
-            let isSelected = btn.tag == kind.rawValue
-            btn.tintColor = isSelected ? LumosTheme.Pigment.auroraCyan : LumosTheme.Pigment.textMuted
-            btn.setTitleColor(isSelected ? LumosTheme.Pigment.auroraCyan : LumosTheme.Pigment.textMuted, for: .normal)
+        // Scroll to make selected pill visible
+        if let pill = pillButtons.first(where: { $0.kind == kind }) {
+            let frame = pill.convert(pill.bounds, to: scrollView)
+            scrollView.scrollRectToVisible(frame.insetBy(dx: -12, dy: 0), animated: true)
         }
     }
 
-    @objc private func tapKind(_ sender: UIButton) {
-        guard let kind = ZephyrBonusKind(rawValue: sender.tag) else { return }
-        selectKind(kind)
-        onKindSelected?(kind)
+    @objc private func tapKind(_ sender: ZephyrPillButton) {
+        selectKind(sender.kind)
+        onKindSelected?(sender.kind)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+}
+
+// MARK: - Pill Button
+final class ZephyrPillButton: UIControl {
+
+    let kind: ZephyrBonusKind
+    private let iconView = UIImageView()
+    private let labelView = UILabel()
+    private var isActive = false
+
+    init(kind: ZephyrBonusKind) {
+        self.kind = kind
+        super.init(frame: .zero)
+        layer.cornerRadius = LumosTheme.Radius.pill
+        layer.borderWidth = 1.5
+
+        iconView.image = UIImage(systemName: kind.stellarIcon)
+        iconView.contentMode = .scaleAspectFit
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+
+        labelView.text = kind.stellarTitle
+        labelView.font = LumosTheme.Typeface.subhead(13)
+        labelView.translatesAutoresizingMaskIntoConstraints = false
+
+        let row = UIStackView(arrangedSubviews: [iconView, labelView])
+        row.axis = .horizontal
+        row.spacing = 5
+        row.alignment = .center
+        row.isUserInteractionEnabled = false
+        row.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(row)
+
+        NSLayoutConstraint.activate([
+            iconView.widthAnchor.constraint(equalToConstant: 16),
+            iconView.heightAnchor.constraint(equalToConstant: 16),
+            row.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            row.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            row.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            row.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
+        ])
+
+        setActive(false)
+
+        addTarget(self, action: #selector(pressBegan), for: .touchDown)
+        addTarget(self, action: #selector(pressEnded), for: [.touchUpInside, .touchUpOutside, .touchCancel])
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    func setActive(_ active: Bool) {
+        isActive = active
+        UIView.animate(withDuration: 0.2) {
+            if active {
+                self.backgroundColor = LumosTheme.Pigment.auroraCyan
+                self.layer.borderColor = LumosTheme.Pigment.auroraCyan.cgColor
+                self.iconView.tintColor = .white
+                self.labelView.textColor = .white
+            } else {
+                self.backgroundColor = LumosTheme.Pigment.cardSurface
+                self.layer.borderColor = LumosTheme.Pigment.borderGlow.cgColor
+                self.iconView.tintColor = LumosTheme.Pigment.textMuted
+                self.labelView.textColor = LumosTheme.Pigment.textMuted
+            }
+        }
+    }
+
+    @objc private func pressBegan() {
+        UIView.animate(withDuration: 0.1) { self.transform = CGAffineTransform(scaleX: 0.94, y: 0.94) }
+    }
+    @objc private func pressEnded() {
+        UIView.animate(withDuration: 0.15, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 6) {
+            self.transform = .identity
+        }
     }
 }

@@ -249,6 +249,148 @@ final class VaultEmptyStateView: UIView {
     required init?(coder: NSCoder) { super.init(coder: coder) }
 }
 
+// MARK: - RTP Line Chart
+final class NexusLineChartView: UIView {
+
+    private var samples: [Double] = []
+    private var accentColor: UIColor = LumosTheme.Pigment.auroraCyan
+
+    init(samples: [Double], accentColor: UIColor = LumosTheme.Pigment.auroraCyan) {
+        self.samples = samples
+        self.accentColor = accentColor
+        super.init(frame: .zero)
+        backgroundColor = .clear
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func draw(_ rect: CGRect) {
+        guard samples.count > 1, let ctx = UIGraphicsGetCurrentContext() else { return }
+
+        let padL: CGFloat = 8, padR: CGFloat = 8
+        let padT: CGFloat = 8, padB: CGFloat = 20
+        let drawW = rect.width - padL - padR
+        let drawH = rect.height - padT - padB
+
+        // Running average
+        var running: [Double] = []
+        var sum = 0.0
+        for (i, v) in samples.enumerated() {
+            sum += v
+            running.append(sum / Double(i + 1))
+        }
+
+        let minV = running.min() ?? 0
+        let maxV = running.max() ?? 1
+        let range = maxV - minV == 0 ? 1 : maxV - minV
+
+        func point(i: Int) -> CGPoint {
+            let x = padL + CGFloat(i) / CGFloat(running.count - 1) * drawW
+            let y = padT + drawH - CGFloat((running[i] - minV) / range) * drawH
+            return CGPoint(x: x, y: y)
+        }
+
+        // Gradient fill
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: padL, y: padT + drawH))
+        for i in 0..<running.count { i == 0 ? path.move(to: point(i: i)) : path.addLine(to: point(i: i)) }
+        path.addLine(to: CGPoint(x: padL + drawW, y: padT + drawH))
+        path.close()
+
+        ctx.saveGState()
+        ctx.addPath(path.cgPath)
+        ctx.clip()
+        let gradColors = [accentColor.withAlphaComponent(0.22).cgColor, accentColor.withAlphaComponent(0.0).cgColor]
+        let grad = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: gradColors as CFArray, locations: [0, 1])!
+        ctx.drawLinearGradient(grad, start: CGPoint(x: 0, y: padT), end: CGPoint(x: 0, y: padT + drawH), options: [])
+        ctx.restoreGState()
+
+        // Line
+        let linePath = UIBezierPath()
+        for i in 0..<running.count { i == 0 ? linePath.move(to: point(i: i)) : linePath.addLine(to: point(i: i)) }
+        ctx.setStrokeColor(accentColor.cgColor)
+        ctx.setLineWidth(2)
+        ctx.setLineCap(.round)
+        ctx.addPath(linePath.cgPath)
+        ctx.strokePath()
+
+        // Baseline label
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: LumosTheme.Typeface.body(8),
+            .foregroundColor: LumosTheme.Pigment.textMuted
+        ]
+        let leftLabel = String(format: "%.1fx", running.first ?? 0)
+        let rightLabel = String(format: "%.1fx", running.last ?? 0)
+        (leftLabel as NSString).draw(at: CGPoint(x: padL, y: rect.height - 14), withAttributes: attrs)
+        let rSz = (rightLabel as NSString).size(withAttributes: attrs)
+        (rightLabel as NSString).draw(at: CGPoint(x: rect.width - padR - rSz.width, y: rect.height - 14), withAttributes: attrs)
+    }
+}
+
+// MARK: - Pie Chart
+final class NexusPieChartView: UIView {
+
+    struct Slice {
+        let label: String
+        let value: Double
+        let color: UIColor
+    }
+
+    private let slices: [Slice]
+
+    init(slices: [Slice]) {
+        self.slices = slices
+        super.init(frame: .zero)
+        backgroundColor = .clear
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func draw(_ rect: CGRect) {
+        guard !slices.isEmpty, let ctx = UIGraphicsGetCurrentContext() else { return }
+        let total = slices.reduce(0) { $0 + $1.value }
+        guard total > 0 else { return }
+
+        let legendW: CGFloat = 110
+        let pieSize = min(rect.height - 8, rect.width - legendW - 16)
+        let center = CGPoint(x: pieSize / 2 + 4, y: rect.midY)
+        let radius = pieSize / 2 - 4
+
+        var startAngle: CGFloat = -.pi / 2
+        for slice in slices {
+            let sweep = CGFloat(slice.value / total) * 2 * .pi
+            let end = startAngle + sweep
+            ctx.setFillColor(slice.color.cgColor)
+            ctx.move(to: center)
+            ctx.addArc(center: center, radius: radius, startAngle: startAngle, endAngle: end, clockwise: false)
+            ctx.fillPath()
+            ctx.setStrokeColor(LumosTheme.Pigment.cardSurface.cgColor)
+            ctx.setLineWidth(1.5)
+            ctx.move(to: center)
+            ctx.addArc(center: center, radius: radius, startAngle: startAngle, endAngle: end, clockwise: false)
+            ctx.strokePath()
+            startAngle = end
+        }
+
+        // Center hole
+        ctx.setFillColor(LumosTheme.Pigment.cardSurface.cgColor)
+        ctx.addArc(center: center, radius: radius * 0.46, startAngle: 0, endAngle: .pi * 2, clockwise: false)
+        ctx.fillPath()
+
+        // Legend
+        let lx = pieSize + 12
+        let rowH: CGFloat = 18
+        let totalRows = CGFloat(slices.count)
+        var ly = rect.midY - (totalRows * rowH) / 2
+        let dotAttrs: [NSAttributedString.Key: Any] = [.font: LumosTheme.Typeface.body(9), .foregroundColor: LumosTheme.Pigment.textSecondary]
+        for slice in slices {
+            ctx.setFillColor(slice.color.cgColor)
+            ctx.fill(CGRect(x: lx, y: ly + 4, width: 8, height: 8))
+            let pct = String(format: "%.0f%% %@", slice.value / total * 100, slice.label)
+            (pct as NSString).draw(at: CGPoint(x: lx + 12, y: ly), withAttributes: dotAttrs)
+            ly += rowH
+        }
+    }
+}
+
 // MARK: - Fun Score Gauge
 final class FunScoreGaugeView: UIView {
 

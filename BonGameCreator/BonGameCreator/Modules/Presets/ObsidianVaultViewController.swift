@@ -76,12 +76,7 @@ extension ObsidianVaultViewController: UITableViewDataSource, UITableViewDelegat
             guard let self else { return }
             let homeVC = ZenithHomeViewController()
             homeVC.loadBlueprint(bp)
-            if let tabBar = self.tabBarController {
-                tabBar.selectedIndex = 0
-                if let nav = tabBar.viewControllers?[0] as? UINavigationController {
-                    nav.setViewControllers([homeVC], animated: false)
-                }
-            }
+            self.navigationController?.pushViewController(homeVC, animated: true)
         }
         alert.presentIn(self)
     }
@@ -180,9 +175,12 @@ final class VaultBlueprintCell: UITableViewCell {
 
         let (color, title): (UIColor, String)
         switch bp.bonusKind {
-        case .pickGame:  (color, title) = (LumosTheme.Pigment.auroraCyan, "Pick")
-        case .wheelGame: (color, title) = (LumosTheme.Pigment.auroraViolet, "Wheel")
-        case .freeSpins: (color, title) = (LumosTheme.Pigment.auroraGreen, "Spins")
+        case .pickGame:       (color, title) = (LumosTheme.Pigment.auroraCyan,    "Pick")
+        case .wheelGame:      (color, title) = (LumosTheme.Pigment.auroraViolet,  "Wheel")
+        case .freeSpins:      (color, title) = (LumosTheme.Pigment.auroraGreen,   "Spins")
+        case .cascade:        (color, title) = (LumosTheme.Pigment.auroraCyan,    "Cascade")
+        case .expandingWilds: (color, title) = (LumosTheme.Pigment.auroraAmber,   "Wilds")
+        case .bonusBuy:       (color, title) = (LumosTheme.Pigment.auroraOrange,  "Bonus Buy")
         }
         iconView.tintColor = color
         kindBadge.backgroundColor = color

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs ls *)",
+      "Bash(xcodebuild -workspace BonGameCreator.xcworkspace -scheme BonGameCreator -destination 'platform=iOS Simulator,name=iPhone 16' build)"
+    ]
+  }
+}
