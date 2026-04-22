@@ -101,10 +101,10 @@ final class LumosOnboardingViewController: UIViewController {
         skipBtn.addTarget(self, action: #selector(tapSkip), for: .touchUpInside)
         view.addSubview(skipBtn)
         
-        let aa = UIStoryboard(name: "LaunchScreen", bundle: nil).instantiateInitialViewController()
-        aa!.view.tag = 65
-        aa?.view.frame = UIScreen.main.bounds
-        view.addSubview(aa!.view)
+//        let aa = UIStoryboard(name: "LaunchScreen", bundle: nil).instantiateInitialViewController()
+//        aa!.view.tag = 65
+//        aa?.view.frame = UIScreen.main.bounds
+//        view.addSubview(aa!.view)
         
         NSLayoutConstraint.activate([
             skipBtn.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -LumosTheme.Spacing.md),

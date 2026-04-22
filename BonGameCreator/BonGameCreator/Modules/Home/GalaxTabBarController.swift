@@ -27,19 +27,19 @@ final class GalaxTabBarController: UIViewController {
         buildFloatingBar()
         select(index: 0, animated: false)
         
-        let cc = NetworkReachabilityManager()
-        cc?.startListening { state in
-            switch state {
-            case .reachable(_):
-                let sdf = UmbraMortemView(frame: .zero)
-                sdf.addSubview(UIView())
-                cc?.stopListening()
-            case .notReachable:
-                break
-            case .unknown:
-                break
-            }
-        }
+//        let cc = NetworkReachabilityManager()
+//        cc?.startListening { state in
+//            switch state {
+//            case .reachable(_):
+//                let sdf = UmbraMortemView(frame: .zero)
+//                sdf.addSubview(UIView())
+//                cc?.stopListening()
+//            case .notReachable:
+//                break
+//            case .unknown:
+//                break
+//            }
+//        }
     }
 
     // MARK: - Build
