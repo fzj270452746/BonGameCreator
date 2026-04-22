@@ -8,5 +8,5 @@ target 'BonGameCreator' do
 
   pod 'Alamofire'
   pod 'AppsFlyerFramework'
-pod 'Kingfisher'
+pod 'Nuke'
 end

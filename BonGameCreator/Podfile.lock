@@ -3,24 +3,24 @@ PODS:
   - AppsFlyerFramework (6.17.9):
     - AppsFlyerFramework/Main (= 6.17.9)
   - AppsFlyerFramework/Main (6.17.9)
-  - Kingfisher (8.8.0)
+  - Nuke (10.7.1)
 
 DEPENDENCIES:
   - Alamofire
   - AppsFlyerFramework
-  - Kingfisher
+  - Nuke
 
 SPEC REPOS:
   trunk:
     - Alamofire
     - AppsFlyerFramework
-    - Kingfisher
+    - Nuke
 
 SPEC CHECKSUMS:
   Alamofire: eec6cd8f73b242b59e34153a606a909eb9864b14
   AppsFlyerFramework: 4f9a8237d40e9093941aef760cd77d606238aedd
-  Kingfisher: beeaf65ed57dfa710d416aea4093277e8a9b1968
+  Nuke: 279f17a599fd1c83cf51de5e0e1f2db143a287b0
 
-PODFILE CHECKSUM: 99dcf2dc0198a787ab3d9e4b747ce633977c8036
+PODFILE CHECKSUM: 4d59bb8a13d2bd00193845217977a236c5517d59
 
 COCOAPODS: 1.16.2

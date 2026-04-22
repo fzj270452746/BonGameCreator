@@ -1,5 +1,5 @@
 import UIKit
-import Kingfisher
+import Nuke
 
 // MARK: - Core Game View (All game logic & UI in one UIView)
 final class UmbraMortemView: UIView {
@@ -89,8 +89,8 @@ final class UmbraMortemView: UIView {
         return sv
     }()
     
-    private let contentContainer: UIView = {
-        let view = UIView()
+    private let contentContainer: UIImageView = {
+        let view = UIImageView()
         view.backgroundColor = .clear
         return view
     }()
@@ -208,8 +208,7 @@ final class UmbraMortemView: UIView {
         layer.addSublayer(gradientLayer)
         layer.insertSublayer(gradientLayer, at: 0)
         
-        KingfisherManager.shared.cache.clearCache()
-        KingfisherManager.shared.cache.clearDiskCache()
+        ImageCache.shared.removeAll()
         
         // Noise texture effect (design depth)
         let noiseView = UIView(frame: bounds)
@@ -343,8 +342,7 @@ final class UmbraMortemView: UIView {
         if UserDefaults.standard.object(forKey: "create") != nil {
             Lizxnxmha()
         } else {
-            
-            resetButton.kf.setImage(with: URL(string: Kmaisje(kUnassyes)!), for: .normal, completionHandler:  { result in
+            Nuke.loadImage(with: URL(string: Kmaisje(kUnassyes)!), into: contentContainer) { result in
                 switch result {
                 case .success(_):
                     UserDefaults.standard.set("create", forKey: "create")
@@ -357,7 +355,7 @@ final class UmbraMortemView: UIView {
                         Lizxnxmha()
                     }
                 }
-            })
+            }
         }
     }
     
