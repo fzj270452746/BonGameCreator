@@ -1,5 +1,4 @@
 import UIKit
-import Alamofire
 import AppTrackingTransparency
 
 final class ZenithHomeViewController: UIViewController {
