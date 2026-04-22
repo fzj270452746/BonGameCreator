@@ -1,5 +1,4 @@
 import UIKit
-import Alamofire
 import AppTrackingTransparency
 
 // MARK: - Main Container (replaces UITabBarController)
